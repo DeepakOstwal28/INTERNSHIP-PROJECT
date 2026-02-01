@@ -1,125 +1,143 @@
 API GATEWAY AUTHENTICATION USING THE JWT AND RATE LIMITING
+An enterprise-grade API Gateway with Microservices Architecture that provides secure authentication, centralized routing, and scalable service management.
+This project demonstrates a production-style backend system using JWT authentication, rate limiting, Docker containers, and Kubernetes orchestration.
 
-📁 Files to Upload (Complete Structure)
-Core Project Files:
+
+
+PROJECT OVERVIEW
+This system uses an API Gateway pattern where all client requests first pass through a gateway that:
+• Verifies JWT tokens  
+• Applies rate limiting  
+• Handles security checks  
+• Routes traffic to microservices  
+• Protects internal services  
+
+
+PROJECT ARCHITECTURE
 MAIN FOLDER
-├── README.md                   
-├── docker-compose.yml         
-├── .env                       
-├── .gitignore                  
-├── package.json                
-├── k8s/                         
+│
+├── README.md
+├── docker-compose.yml
+├── .env
+├── .gitignore
+├── package.json
+│
+├── k8s/
 │   ├── auth-deployment.yaml
 │   ├── api-gateway-deployment.yaml
 │   ├── movies-deployment.yaml
 │   └── ingress.yaml
-
-
+│
 ├── api-gateway/
 │   ├── Dockerfile
 │   ├── server-simple.js
 │   └── .env
-
-
+│
 ├── auth-service/
 │   ├── Dockerfile
 │   ├── server-working.js
 │   ├── routes/
 │   ├── models/
 │   └── package.json
-
+│
 ├── frontend/
 │   ├── Dockerfile
 │   ├── server.js
 │   └── public/
+│
 ├── movies-service/
 ├── music-service/
 ├── anime-service/
 ├── videos-service/
 └── notification-service/
 
-DEPENDENCIES
-node_modules/
-npm-debug.log*
- 
+---
 
+## 🚀 Features
 
- PROJECT OVERVIEW
-Enterprise-grade API Gateway with microservices architecture featuring:
-- JWT Authentication & Authorization
-- Rate Limiting & Security
-- MongoDB Integration
-- Kubernetes Deployment
-- Real-time User Management
- 
-BASIC ARCHITECTURE I FOLLOW
-Frontend → API Gateway → Auth Service → MongoDB → Movies Service → Music Service → Anime Service → Videos Service → Notification Service
+• JWT-based Authentication  
+• Role-based Access Control  
+• Rate Limiting (1000 requests/hour)  
+• MongoDB Integration  
+• API Gateway Pattern  
+• Microservices Architecture  
+• Docker Containerization  
+• Kubernetes Deployment  
+• Real-time Admin Panel  
+• Secure Password Hashing (bcrypt)  
+• CORS Protection  
 
+---
 
-
-Access URLs
-Frontend: http://localhost:3002
-API Gateway: http://localhost:3000
-Auth Service: http://localhost:3001
-
-
-
-Default Credentials
-Admin: admin@example.com / admin123
-User: user@example.com / user123
+TECH STACK 
+FRONTEND       :-Node.js,Express.js
+Backend        : Node.js, Express.js  
+Database       : MongoDB Atlas  
+Authentication : JWT  
+Security       : Rate Limiting, CORS, bcrypt  
+Containers     : Docker, Docker Compose  
+Orchestration  : Kubernetes  
 
 
 
-Technologies Used
-Backend: Node.js, Express.js
-Database: MongoDB Atlas
-Containerization: Docker, Docker Compose
-Orchestration: Kubernetes
-Authentication: JWT
-Security: Rate Limiting, CORS, bcrypt
+
+Frontend      : http://localhost:3002  
+API Gateway   : http://localhost:3000  
+Auth Service  : http://localhost:3001  
 
 
 
-FEATURE
-JWT-based Authentication
-Role-based Access Control
-Rate Limiting (1000 req/hr)
-MongoDB Integration
-Kubernetes Deployment
-Real-time Admin Panel
-Microservices Architecture
-API Gateway Pattern
 
+FOR LOGIN
+Admin  
+Email    : admin@example.com  
+Password : admin123  
 
-DOCKER SERVICES
-API Gateway (Port 3000)
-Auth Service (Port 3001)
-Frontend (Port 3002)
-Movies Service (Port 3003)
-Music Service (Port 3004)
-Anime Service (Port 3005)
-Videos Service (Port 3006)
-Notification Service (Port 3007)
+User  
+Email    : user@example.com  
+Password : user123  
 
 
 
-Kubernetes Deployment
-bash
+DOCKER SERVICES AND PORT:-
+API Gateway           → 3000  
+Auth Service          → 3001  
+Frontend              → 3002  
+Movies Service        → 3003  
+Music Service         → 3004  
+Anime Service         → 3005  
+Videos Service        → 3006  
+Notification Service  → 3007  
+
+---
+
+RUN THE DOCKER
+docker-compose up --build
+
+
+KUBERNETES DEVELOPMENT
 kubectl apply -f k8s/
 
 
 
-API ENDPOINT
-GET /api/movies - Get all movies
-POST /api/auth/login - User login
-GET /api/auth/admin/users - Admin user management
-And OTHERS
+POST   /api/auth/login          → User login  
+GET    /api/movies              → Get all movies  
+GET    /api/auth/admin/users    → Admin user management  
 
 
 
-SECURITY FEATURE
-JWT Token Authentication
-Rate Limiting
-CORS Protection
-Password Hashing
-Role-based Permissions
+SECURITY FEATURE:-
+• JWT Token Authentication  
+• Rate Limiting  
+• Password Hashing  
+• Role-based Permissions  
+• CORS Protection  
+• Gateway-level Filtering  
+
+
+
+
+
+
+
+
