@@ -1,0 +1,109 @@
+version: '3'
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - movies-service
+      - music-service
+      - anime-service
+      - videos-service
+      - notification-service
+    environment:
+      - NODE_ENV=production
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - MOVIES_SERVICE_URL=http://movies-service:3003
+      - MUSIC_SERVICE_URL=http://music-service:3004
+      - ANIME_SERVICE_URL=http://anime-service:3005
+      - VIDEOS_SERVICE_URL=http://videos-service:3006
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3007
+    restart: always
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb+srv://apigateway:deepak123@api-gateway-cluster.v6eawpq.mongodb.net/apigateway?retryWrites=true&w=majority&appName=api-gateway-cluster
+    restart: always
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - API_GATEWAY_URL=http://localhost:3000
+    depends_on:
+      - api-gateway
+    restart: always
+
+  movies-service:
+    build: ./movies-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - MONGODB_URI=mongodb+srv://apigateway:deepak123@api-gateway-cluster.v6eawpq.mongodb.net/apigateway?retryWrites=true&w=majority&appName=api-gateway-cluster
+    restart: always
+
+  music-service:
+    build: ./music-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - MONGODB_URI=mongodb+srv://apigateway:deepak123@api-gateway-cluster.v6eawpq.mongodb.net/apigateway?retryWrites=true&w=majority&appName=api-gateway-cluster
+    restart: always
+
+  anime-service:
+    build: ./anime-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - MONGODB_URI=mongodb+srv://apigateway:deepak123@api-gateway-cluster.v6eawpq.mongodb.net/apigateway?retryWrites=true&w=majority&appName=api-gateway-cluster
+    restart: always
+
+  videos-service:
+    build: ./videos-service
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=production
+      - PORT=3006
+      - MONGODB_URI=mongodb+srv://apigateway:deepak123@api-gateway-cluster.v6eawpq.mongodb.net/apigateway?retryWrites=true&w=majority&appName=api-gateway-cluster
+    restart: always
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=production
+      - PORT=3007
+      - MONGODB_URI=mongodb+srv://apigateway:deepak123@api-gateway-cluster.v6eawpq.mongodb.net/apigateway?retryWrites=true&w=majority&appName=api-gateway-cluster
+    restart: always
+
+  load-balancer:
+    build: ./load-balancer
+    ports:
+      - "3100:3100"
+    depends_on:
+      - api-gateway
+      - frontend
+    environment:
+      - NODE_ENV=production
+      - PORT=3100
+      - API_GATEWAY_URL=http://api-gateway:3000
+      - FRONTEND_URL=http://frontend:3002
+    restart: always

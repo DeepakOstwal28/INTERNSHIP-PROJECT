@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Permission Management Test</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: #667eea; font-weight: bold; }
+        .feature-check {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 2px;
+        }
+        .badge-success { background: #4CAF50; color: white; }
+        .badge-error { background: #f44336; color: white; }
+        .badge-info { background: #667eea; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Real-Time Permission Management Test</h1>
+    
+    <div class="card">
+        <h2>✅ Features Verification</h2>
+        <div id="featuresCheck">
+            <div class="feature-check">
+                <strong>User Management Section:</strong> <span id="userManagementStatus">Checking...</span>
+            </div>
+            <div class="feature-check">
+                <strong>Permission Modal:</strong> <span id="permissionModalStatus">Checking...</span>
+            </div>
+            <div class="feature-check">
+                <strong>Gallery Upload:</strong> <span id="galleryUploadStatus">Checking...</span>
+            </div>
+            <div class="feature-check">
+                <strong>YouTube Integration:</strong> <span id="youtubeStatus">Checking...</span>
+            </div>
+            <div class="feature-check">
+                <strong>Content Management:</strong> <span id="contentStatus">Checking...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>🧪 Test Permission Management</h2>
+        <button onclick="testLoginAndAccess()">1. Login as Admin</button>
+        <button onclick="testLoadUsers()">2. Load Users</button>
+        <button onclick="testPermissionAPI()">3. Test Permission API</button>
+        <button onclick="openAdminPanel()">4. Open Admin Panel</button>
+        <div id="testResults" style="margin-top: 20px;"></div>
+    </div>
+    
+    <div class="card">
+        <h2>📊 Current System Status</h2>
+        <div id="systemStatus">
+            <p>Click buttons above to test the system</p>
+        </div>
+    </div>
+    
+    <script>
+        function log(message, type = 'info', elementId = 'testResults') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<div class="${className}">${message}</div>`;
+        }
+        
+        async function checkFeatures() {
+            try {
+                const response = await fetch('http://localhost:3002/admin');
+                const text = await response.text();
+                
+                // Check User Management
+                const hasUserManagement = text.includes('User & Permission Management') || text.includes('usersTable');
+                document.getElementById('userManagementStatus').innerHTML = hasUserManagement ? 
+                    '<span class="badge badge-success">✅ PRESENT</span>' : 
+                    '<span class="badge badge-error">❌ MISSING</span>';
+                
+                // Check Permission Modal
+                const hasPermissionModal = text.includes('permissionModal') && text.includes('editPermissions');
+                document.getElementById('permissionModalStatus').innerHTML = hasPermissionModal ? 
+                    '<span class="badge badge-success">✅ PRESENT</span>' : 
+                    '<span class="badge badge-error">❌ MISSING</span>';
+                
+                // Check Gallery Upload
+                const hasGalleryUpload = text.includes('Upload from Gallery') || text.includes('handleGalleryUpload');
+                document.getElementById('galleryUploadStatus').innerHTML = hasGalleryUpload ? 
+                    '<span class="badge badge-success">✅ PRESENT</span>' : 
+                    '<span class="badge badge-error">❌ MISSING</span>';
+                
+                // Check YouTube
+                const hasYouTube = text.includes('Add YouTube Video') || text.includes('handleYouTubeUrl');
+                document.getElementById('youtubeStatus').innerHTML = hasYouTube ? 
+                    '<span class="badge badge-success">✅ PRESENT</span>' : 
+                    '<span class="badge badge-error">❌ MISSING</span>';
+                
+                // Check Content Management
+                const hasContent = text.includes('openContentModal') && text.includes('saveContent');
+                document.getElementById('contentStatus').innerHTML = hasContent ? 
+                    '<span class="badge badge-success">✅ PRESENT</span>' : 
+                    '<span class="badge badge-error">❌ MISSING</span>';
+                
+            } catch (error) {
+                console.error('Error checking features:', error);
+            }
+        }
+        
+        async function testLoginAndAccess() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '';
+            
+            try {
+                // Login
+                const loginResponse = await fetch('http://localhost:3001/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                const loginData = await loginResponse.json();
+                
+                if (loginData.accessToken) {
+                    localStorage.setItem('accessToken', loginData.accessToken);
+                    localStorage.setItem('token', loginData.accessToken);
+                    localStorage.setItem('authToken', loginData.accessToken);
+                    localStorage.setItem('user', JSON.stringify(loginData.user));
+                    
+                    log('✅ Login successful! Token stored.', 'success');
+                    log(`User: ${loginData.user.username}, Role: ${loginData.user.role}`, 'info');
+                    
+                    // Update system status
+                    updateSystemStatus('logged_in', loginData.user);
+                } else {
+                    log('❌ Login failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testLoadUsers() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '';
+            
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                log('❌ No token found. Please login first.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const users = data.users || [];
+                    
+                    log(`✅ Loaded ${users.length} users successfully!`, 'success');
+                    
+                    users.forEach(user => {
+                        const permissions = (user.assignedMicroservices || []).join(', ');
+                        log(`• ${user.username} (${user.role}) - Permissions: ${permissions || 'None'}`, 'info');
+                    });
+                    
+                    updateSystemStatus('users_loaded', users);
+                } else {
+                    log(`❌ Failed to load users: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testPermissionAPI() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '';
+            
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                log('❌ No token found. Please login first.', 'error');
+                return;
+            }
+            
+            log('Testing Permission Update API...', 'info');
+            
+            // First get users
+            try {
+                const usersResponse = await fetch('http://localhost:3000/api/auth/admin/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!usersResponse.ok) {
+                    log('❌ Cannot fetch users', 'error');
+                    return;
+                }
+                
+                const usersData = await usersResponse.json();
+                const testUser = usersData.users.find(u => u.role === 'user');
+                
+                if (!testUser) {
+                    log('⚠️ No regular user found to test permissions', 'error');
+                    return;
+                }
+                
+                log(`Testing with user: ${testUser.username}`, 'info');
+                log(`Current permissions: ${testUser.assignedMicroservices.join(', ')}`, 'info');
+                
+                // Test permission update
+                const newPermissions = ['profile', 'movies', 'music'];
+                
+                const updateResponse = await fetch(`http://localhost:3000/api/auth/admin/users/${testUser.id}/permissions`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ assignedMicroservices: newPermissions })
+                });
+                
+                if (updateResponse.ok) {
+                    log(`✅ Permissions updated successfully!`, 'success');
+                    log(`New permissions: ${newPermissions.join(', ')}`, 'success');
+                } else {
+                    log(`❌ Failed to update permissions`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function openAdminPanel() {
+            window.open('http://localhost:3002/admin', '_blank');
+        }
+        
+        function updateSystemStatus(status, data) {
+            const statusDiv = document.getElementById('systemStatus');
+            
+            if (status === 'logged_in') {
+                statusDiv.innerHTML = `
+                    <p class="success">✅ Logged in as: ${data.username}</p>
+                    <p>Role: <span class="badge badge-info">${data.role.toUpperCase()}</span></p>
+                `;
+            } else if (status === 'users_loaded') {
+                statusDiv.innerHTML += `
+                    <p class="success">✅ Users loaded: ${data.length}</p>
+                    <p>Admin users: ${data.filter(u => u.role === 'admin').length}</p>
+                    <p>Regular users: ${data.filter(u => u.role === 'user').length}</p>
+                `;
+            }
+        }
+        
+        // Check features on load
+        window.onload = () => {
+            checkFeatures();
+        };
+    </script>
+</body>
+</html>
