@@ -13,16 +13,21 @@ MAIN FOLDER
 │   ├── api-gateway-deployment.yaml
 │   ├── movies-deployment.yaml
 │   └── ingress.yaml
+
+
 ├── api-gateway/
 │   ├── Dockerfile
 │   ├── server-simple.js
 │   └── .env
+
+
 ├── auth-service/
 │   ├── Dockerfile
 │   ├── server-working.js
 │   ├── routes/
 │   ├── models/
 │   └── package.json
+
 ├── frontend/
 │   ├── Dockerfile
 │   ├── server.js
