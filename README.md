@@ -15,45 +15,45 @@ This system uses an API Gateway pattern where all client requests first pass thr
 
 PROJECT ARCHITECTURE
 MAIN FOLDER
-│
-├── README.md
-├── docker-compose.yml
-├── .env
-├── .gitignore
-├── package.json
-│
-├── k8s/
-│   ├── auth-deployment.yaml
-│   ├── api-gateway-deployment.yaml
-│   ├── movies-deployment.yaml
-│   └── ingress.yaml
-│
-├── api-gateway/
-│   ├── Dockerfile
-│   ├── server-simple.js
-│   └── .env
-│
-├── auth-service/
-│   ├── Dockerfile
-│   ├── server-working.js
-│   ├── routes/
-│   ├── models/
-│   └── package.json
-│
-├── frontend/
-│   ├── Dockerfile
-│   ├── server.js
-│   └── public/
-│
-├── movies-service/
-├── music-service/
-├── anime-service/
-├── videos-service/
-└── notification-service/
 
----
+README.md
+ docker-compose.yml
+ .env
+ .gitignore
+ package.json
 
-## 🚀 Features
+k8s/
+ auth-deployment.yaml
+ api-gateway-deployment.yaml
+ movies-deployment.yaml
+ingress.yaml
+
+api-gateway/
+ Dockerfile
+ server-simple.js
+ .env
+
+auth-service/
+ Dockerfile
+ server-working.js
+ routes/
+ models/
+ package.json
+
+frontend/
+  Dockerfile
+  server.js
+  public/
+
+movies-service/
+music-service/
+anime-service/
+videos-service/
+notification-service/
+
+
+
+FEATURE
 
 • JWT-based Authentication  
 • Role-based Access Control  
@@ -67,7 +67,7 @@ MAIN FOLDER
 • Secure Password Hashing (bcrypt)  
 • CORS Protection  
 
----
+
 
 TECH STACK 
 FRONTEND       :-Node.js,Express.js
@@ -109,7 +109,7 @@ Anime Service         → 3005
 Videos Service        → 3006  
 Notification Service  → 3007  
 
----
+
 
 RUN THE DOCKER
 docker-compose up --build
