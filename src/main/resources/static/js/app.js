@@ -77,10 +77,10 @@ function quickFill(userType) {
     const usernameInput = document.getElementById('login-username');
     const passwordInput = document.getElementById('login-password');
     if (userType === 'admin') {
-        usernameInput.value = 'admin';
+        usernameInput.value = 'admin@example.com';
         passwordInput.value = 'admin123';
     } else {
-        usernameInput.value = 'user';
+        usernameInput.value = 'user@example.com';
         passwordInput.value = 'user123';
     }
 }
@@ -471,6 +471,11 @@ async function loadAdminStats() {
     }
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
 async function loadAdminUsers() {
     try {
         const res = await apiFetch('/admin/users');
@@ -480,13 +485,22 @@ async function loadAdminUsers() {
             res.data.forEach(u => {
                 const tr = document.createElement('tr');
                 const permNames = u.activePermissions.map(p => `${p.name} (${p.isTemporary ? 'Temp' : 'Perm'})`).join(', ') || 'None';
+                const roleBadges = u.roles.map(r => {
+                    if (r === 'ROLE_ADMIN') return `<span class="role-pill role-admin">ADMIN</span>`;
+                    if (r === 'ROLE_USER') return `<span class="role-pill role-user">USER</span>`;
+                    return `<span class="role-pill">${escapeHtml(r)}</span>`;
+                }).join(' ');
+
                 tr.innerHTML = `
                     <td>#${u.id}</td>
-                    <td><strong>${u.username}</strong><br><small style="color: var(--text-muted);">${u.email}</small></td>
-                    <td>${u.roles.join(', ')}</td>
-                    <td><small>${permNames}</small></td>
+                    <td><strong>${escapeHtml(u.username)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(u.email)}</small></td>
+                    <td><div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">${roleBadges}</div></td>
+                    <td><small>${escapeHtml(permNames)}</small></td>
                     <td>
-                        <button class="btn btn-secondary btn-sm" onclick="openAdminGrantModal(${u.id}, '${u.username}')">+ Grant</button>
+                        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-sm" onclick="openAdminRoleModal(${u.id}, '${escapeHtml(u.username)}', '${u.roles.join(',')}')">🛡️ Assign Roles</button>
+                            <button class="btn btn-secondary btn-sm" onclick="openAdminGrantModal(${u.id}, '${escapeHtml(u.username)}')">+ Grant</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -497,10 +511,62 @@ async function loadAdminUsers() {
     }
 }
 
+let targetUserIdForRoles = null;
+function openAdminRoleModal(userId, username, rolesStr) {
+    targetUserIdForRoles = userId;
+    document.getElementById('role-modal-user').textContent = `User: ${username} (ID: #${userId})`;
+    const roles = rolesStr ? rolesStr.split(',') : [];
+    document.getElementById('role-cb-user').checked = roles.includes('ROLE_USER');
+    document.getElementById('role-cb-admin').checked = roles.includes('ROLE_ADMIN');
+    openModal('admin-role-modal');
+}
+
+function setRolePresets(preset) {
+    if (preset === 'USER_ONLY') {
+        document.getElementById('role-cb-user').checked = true;
+        document.getElementById('role-cb-admin').checked = false;
+    } else if (preset === 'PROMOTE_ADMIN') {
+        document.getElementById('role-cb-user').checked = true;
+        document.getElementById('role-cb-admin').checked = true;
+    }
+}
+
+async function handleAdminRoleSubmit(e) {
+    e.preventDefault();
+    if (!targetUserIdForRoles) return;
+
+    const roles = [];
+    if (document.getElementById('role-cb-user').checked) roles.push('ROLE_USER');
+    if (document.getElementById('role-cb-admin').checked) roles.push('ROLE_ADMIN');
+
+    if (roles.length === 0) {
+        showToast('Please select at least one role (e.g. ROLE_USER)', 'error');
+        return;
+    }
+
+    try {
+        const res = await apiFetch(`/admin/users/${targetUserIdForRoles}/roles`, {
+            method: 'PUT',
+            body: JSON.stringify({ roles })
+        });
+        if (res.success) {
+            showToast(`Roles updated for #${targetUserIdForRoles}: ${roles.join(', ')}`, 'success');
+            closeModal('admin-role-modal');
+            await loadAdminUsers();
+            await loadAdminStats();
+            if (currentUser && currentUser.id === targetUserIdForRoles) {
+                await fetchCurrentUser();
+            }
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 let targetUserIdForGrant = null;
 function openAdminGrantModal(userId, username) {
     targetUserIdForGrant = userId;
-    document.getElementById('grant-modal-user').textContent = `User: ${username} (ID: ${userId})`;
+    document.getElementById('grant-modal-user').textContent = `User: ${username} (ID: #${userId})`;
     openModal('admin-grant-modal');
 }
 

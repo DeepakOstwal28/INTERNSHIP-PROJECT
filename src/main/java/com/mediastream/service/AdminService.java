@@ -21,6 +21,7 @@ import java.util.List;
 public class AdminService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final UserPermissionGrantRepository grantRepository;
     private final AccessRequestRepository accessRequestRepository;
@@ -28,12 +29,14 @@ public class AdminService {
     private final PaymentTransactionRepository paymentRepository;
 
     public AdminService(UserRepository userRepository,
+                        RoleRepository roleRepository,
                         PermissionRepository permissionRepository,
                         UserPermissionGrantRepository grantRepository,
                         AccessRequestRepository accessRequestRepository,
                         MediaContentRepository mediaRepository,
                         PaymentTransactionRepository paymentRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.grantRepository = grantRepository;
         this.accessRequestRepository = accessRequestRepository;
@@ -43,29 +46,105 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(u -> {
-            UserDto dto = new UserDto();
-            dto.setId(u.getId());
-            dto.setUsername(u.getUsername());
-            dto.setEmail(u.getEmail());
-            dto.setEnabled(u.isEnabled());
-            dto.setCreatedAt(u.getCreatedAt());
-            dto.setRoles(u.getRoles().stream().map(Role::getName).toList());
+        return userRepository.findAll().stream().map(this::toUserDto).toList();
+    }
 
-            List<UserDto.ActivePermissionDto> perms = u.getPermissionGrants().stream()
-                    .filter(UserPermissionGrant::isActive)
-                    .map(g -> new UserDto.ActivePermissionDto(
-                            g.getPermission().getId(),
-                            g.getPermission().getName(),
-                            g.getPermission().getDescription(),
-                            g.getExpiresAt(),
-                            g.getExpiresAt() != null,
-                            g.getGrantType()
-                    ))
-                    .toList();
-            dto.setActivePermissions(perms);
-            return dto;
-        }).toList();
+    @Transactional(readOnly = true)
+    public List<String> getAllRoles() {
+        return roleRepository.findAll().stream()
+                .map(Role::getName)
+                .sorted()
+                .toList();
+    }
+
+    @Transactional
+    public UserDto assignRolesToUser(Long userId, java.util.Set<String> roleNames) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found with id: " + userId, HttpStatus.NOT_FOUND));
+
+        if (roleNames == null || roleNames.isEmpty()) {
+            throw new ApiException("At least one role must be assigned to the user", HttpStatus.BAD_REQUEST);
+        }
+
+        java.util.Set<Role> rolesToSet = new java.util.HashSet<>();
+        for (String rName : roleNames) {
+            String normalized = rName.trim().toUpperCase();
+            if (!normalized.startsWith("ROLE_")) {
+                normalized = "ROLE_" + normalized;
+            }
+            final String finalRoleName = normalized;
+            Role role = roleRepository.findByName(finalRoleName)
+                    .orElseGet(() -> roleRepository.save(new Role(finalRoleName)));
+            rolesToSet.add(role);
+        }
+
+        user.setRoles(rolesToSet);
+        User savedUser = userRepository.save(user);
+        return toUserDto(savedUser);
+    }
+
+    @Transactional
+    public UserDto addRoleToUser(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found with id: " + userId, HttpStatus.NOT_FOUND));
+
+        String normalized = roleName.trim().toUpperCase();
+        if (!normalized.startsWith("ROLE_")) {
+            normalized = "ROLE_" + normalized;
+        }
+        final String finalRoleName = normalized;
+        Role role = roleRepository.findByName(finalRoleName)
+                .orElseGet(() -> roleRepository.save(new Role(finalRoleName)));
+
+        user.getRoles().add(role);
+        User savedUser = userRepository.save(user);
+        return toUserDto(savedUser);
+    }
+
+    @Transactional
+    public UserDto removeRoleFromUser(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found with id: " + userId, HttpStatus.NOT_FOUND));
+
+        String normalized = roleName.trim().toUpperCase();
+        if (!normalized.startsWith("ROLE_")) {
+            normalized = "ROLE_" + normalized;
+        }
+        final String finalRoleName = normalized;
+
+        user.getRoles().removeIf(r -> r.getName().equalsIgnoreCase(finalRoleName));
+        if (user.getRoles().isEmpty()) {
+            Role roleUser = roleRepository.findByName("ROLE_USER")
+                    .orElseGet(() -> roleRepository.save(new Role("ROLE_USER")));
+            user.getRoles().add(roleUser);
+        }
+
+        User savedUser = userRepository.save(user);
+        return toUserDto(savedUser);
+    }
+
+    public UserDto toUserDto(User u) {
+        UserDto dto = new UserDto();
+        dto.setId(u.getId());
+        dto.setUsername(u.getUsername());
+        dto.setEmail(u.getEmail());
+        dto.setEnabled(u.isEnabled());
+        dto.setCreatedAt(u.getCreatedAt());
+        dto.setRoles(u.getRoles().stream().map(Role::getName).sorted().toList());
+
+        List<UserDto.ActivePermissionDto> perms = u.getPermissionGrants().stream()
+                .filter(UserPermissionGrant::isActive)
+                .map(g -> new UserDto.ActivePermissionDto(
+                        g.getPermission().getId(),
+                        g.getPermission().getName(),
+                        g.getPermission().getDescription(),
+                        g.getExpiresAt(),
+                        g.getExpiresAt() != null,
+                        g.getGrantType()
+                ))
+                .toList();
+        dto.setActivePermissions(perms);
+        return dto;
     }
 
     @Transactional

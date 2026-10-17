@@ -3,6 +3,7 @@ package com.mediastream.controller;
 import com.mediastream.dto.AccessRequestDto;
 import com.mediastream.dto.AdminStatsDto;
 import com.mediastream.dto.ApiResponse;
+import com.mediastream.dto.AssignRoleDto;
 import com.mediastream.dto.UserDto;
 import com.mediastream.service.AdminService;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,40 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    @GetMapping("/roles")
+    public ResponseEntity<ApiResponse<List<String>>> getAllRoles() {
+        List<String> roles = adminService.getAllRoles();
+        return ResponseEntity.ok(ApiResponse.ok("All system roles retrieved", roles));
+    }
+
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
         List<UserDto> users = adminService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.ok("All users retrieved", users));
+    }
+
+    @PutMapping("/users/{userId}/roles")
+    public ResponseEntity<ApiResponse<UserDto>> assignRoles(
+            @PathVariable Long userId,
+            @RequestBody AssignRoleDto request) {
+        UserDto updatedUser = adminService.assignRolesToUser(userId, request.getRoles());
+        return ResponseEntity.ok(ApiResponse.ok("Roles assigned to user successfully", updatedUser));
+    }
+
+    @PostMapping("/users/{userId}/roles/add")
+    public ResponseEntity<ApiResponse<UserDto>> addRole(
+            @PathVariable Long userId,
+            @RequestParam String role) {
+        UserDto updatedUser = adminService.addRoleToUser(userId, role);
+        return ResponseEntity.ok(ApiResponse.ok("Role " + role + " added to user successfully", updatedUser));
+    }
+
+    @PostMapping("/users/{userId}/roles/remove")
+    public ResponseEntity<ApiResponse<UserDto>> removeRole(
+            @PathVariable Long userId,
+            @RequestParam String role) {
+        UserDto updatedUser = adminService.removeRoleFromUser(userId, role);
+        return ResponseEntity.ok(ApiResponse.ok("Role " + role + " removed from user successfully", updatedUser));
     }
 
     @PostMapping("/users/{userId}/permissions/{permissionId}/grant")

@@ -2,6 +2,8 @@ package com.mediastream.config;
 
 import com.mediastream.entity.*;
 import com.mediastream.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,8 @@ import java.util.Set;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -43,33 +47,30 @@ public class DataInitializer implements CommandLineRunner {
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_USER")));
 
         // 2. Initialize Permissions
-        Permission permMovies = getOrCreatePermission("STREAM_MOVIES", "Access to HD Movie Streaming Catalog", 9.99);
-        Permission permSeries = getOrCreatePermission("STREAM_SERIES", "Access to TV Series & Web Shows", 12.99);
-        Permission permAnime = getOrCreatePermission("STREAM_ANIME", "Access to Premium Anime Episodes & OVAs", 7.99);
-        Permission permMusic = getOrCreatePermission("STREAM_MUSIC", "High Fidelity Lossless Music & Audio", 4.99);
-        Permission permVip = getOrCreatePermission("VIP_ACCESS", "Universal All-Access Pass to Everything", 24.99);
+        Permission permMovies = getOrCreatePermission("STREAM_MOVIES", "Access to Movie Streaming Catalog", 9.99);
+        Permission permSeries = getOrCreatePermission("STREAM_SERIES", "Access to TV Series Catalog", 12.99);
+        Permission permAnime = getOrCreatePermission("STREAM_ANIME", "Access to Anime Catalog", 7.99);
+        Permission permMusic = getOrCreatePermission("STREAM_MUSIC", "Lossless Audio and Music Streaming", 4.99);
+        Permission permVip = getOrCreatePermission("VIP_ACCESS", "Universal All-Access Pass", 24.99);
 
         // 3. Initialize Admin User
         if (userRepository.findByUsername("admin").isEmpty()) {
-            User admin = new User("admin", "admin@stream.com", passwordEncoder.encode("admin123"));
+            User admin = new User("admin", "admin@example.com", passwordEncoder.encode("admin123"));
             admin.setRoles(Set.of(roleAdmin, roleUser));
             admin = userRepository.save(admin);
 
-            // Give admin VIP access grant
             grantRepository.save(new UserPermissionGrant(admin, permVip, LocalDateTime.now(), null, "ADMIN_PERMANENT_GRANT"));
-            System.out.println(">>> SEEDED ADMIN: username='admin', password='admin123'");
+            log.info("Initialized default administrator account: admin@example.com");
         }
 
         // 4. Initialize Standard Demo User
         if (userRepository.findByUsername("user").isEmpty()) {
-            User regularUser = new User("user", "user@stream.com", passwordEncoder.encode("user123"));
+            User regularUser = new User("user", "user@example.com", passwordEncoder.encode("user123"));
             regularUser.setRoles(Set.of(roleUser));
             regularUser = userRepository.save(regularUser);
 
-            // Grant demo user STREAM_MOVIES by default so they can stream movies immediately,
-            // while Anime/Series/Music remain locked so user can test purchase and request-admin flow!
             grantRepository.save(new UserPermissionGrant(regularUser, permMovies, LocalDateTime.now(), LocalDateTime.now().plusDays(30), "PURCHASE"));
-            System.out.println(">>> SEEDED USER: username='user', password='user123' (Has STREAM_MOVIES active)");
+            log.info("Initialized default user account: user@example.com (STREAM_MOVIES pass)");
         }
 
         // 5. Initialize Sample Media Content
@@ -94,7 +95,7 @@ public class DataInitializer implements CommandLineRunner {
                             "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
                             "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500", "STREAM_MUSIC", 180, 2023)
             ));
-            System.out.println(">>> SEEDED MEDIA CONTENT CATALOG (Movies, Anime, Series, Music)");
+            log.info("Populated media catalog with initial seed content");
         }
     }
 

@@ -3,17 +3,17 @@
 
 ---
 
-## 1. Project Overview & Problem Solved
-This project replaces the fragmented, unscalable multi-server microservice setup with an **Enterprise-grade Spring Boot 3 Monolith** backed by a **Relational SQL Database (PostgreSQL / H2)**, **Spring Security 6 with stateless JWT**, **BCrypt password hashing**, **Sliding-window Rate Limiting**, and **Role-Based Access Control (RBAC)** with **Time-Limited Temporary Permission Grants**.
+## 1. Overview
+StreamFlow is a media streaming application built with a **Spring Boot 3** backend, **Relational SQL Database (H2 / PostgreSQL)**, **Spring Security 6 with stateless JWT**, **BCrypt password hashing**, **Sliding-window Rate Limiting**, and **Role-Based Access Control (RBAC)** supporting dynamic role assignment and time-bounded permission passes.
 
 ---
 
 ## 2. Test Credentials
-| Account Type | Username | Password | Roles | Default Permissions | Description |
+| Account Type | Email / Username | Password | Roles | Default Entitlements | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `admin123` | `ROLE_ADMIN`, `ROLE_USER` | `ALL_ACCESS_ADMIN` | Can view all users, grant/revoke permissions, approve temporary access requests, and see financial stats. |
-| **User** | `user` | `user123` | `ROLE_USER` | `STREAM_MOVIES` (Active) | Can stream Movies immediately. Anime, Series, and Music are locked until purchased or approved by admin. |
-| **New Users** | *Any* | *Any* | `ROLE_USER` | None (Fresh account) | Can register directly via the "Create Account" tab on the web page. |
+| **Admin** | `admin@example.com` (`admin`) | `admin123` | `ROLE_ADMIN`, `ROLE_USER` | `ALL_ACCESS_ADMIN` | Full access to users, roles, permissions, approvals, and platform analytics. |
+| **User** | `user@example.com` (`user`) | `user123` | `ROLE_USER` | `STREAM_MOVIES` | Standard consumer account with default Movies pass. Other tiers require subscription or pass. |
+| **New Users** | *Any* | *Any* | `ROLE_USER` | None | Can register directly via the registration form. |
 
 ---
 
@@ -63,7 +63,7 @@ This project replaces the fragmented, unscalable multi-server microservice setup
 2. **`roles`**: Stores security roles (`ROLE_USER`, `ROLE_ADMIN`).
 3. **`user_roles`**: Join table providing a clean many-to-many relationship between users and roles.
 4. **`permissions`**: Fine-grained streaming permissions (`STREAM_MOVIES`, `STREAM_SERIES`, `STREAM_ANIME`, `STREAM_MUSIC`, `VIP_ACCESS`) with individual subscription pricing.
-5. **`user_permission_grants`**: **The core innovation of this project.** It tracks both permanent subscriptions and **temporary, time-limited access grants** (with `expires_at` timestamps). When a user requests 2 hours from an admin and the admin approves, an entry is created with `expires_at = NOW() + 2 hours`.
+5. **`user_permission_grants`**: Tracks both permanent subscriptions and **temporary, time-limited access grants** (with `expires_at` timestamps). When a user requests trial hours from an admin and the request is approved, an entry is created with `expires_at = NOW() + X hours`.
 6. **`media_content`**: The streaming catalog items, tagged with category and the `required_permission` needed to watch.
 7. **`access_requests`**: Stores user requests for temporary (e.g. 2, 6, 24 hours) access sent to the admin, with status tracking (`PENDING`, `APPROVED`, `REJECTED`).
 8. **`payment_transactions`**: Logs all purchase transactions with unique transaction references (`TX-...`), amounts, and timestamps for financial auditing.
@@ -99,7 +99,7 @@ User (Browser)               RateLimitingFilter             JwtAuthFilter       
 
 ---
 
-## 5. End-to-End User Flow Explained for Interviews
+## 5. End-to-End System Workflow
 
 ### Step 1: User Registration & Login
 - When an unregistered user arrives, they open the **Create Account** tab.

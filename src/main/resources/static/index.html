@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STREAMFLOW - Enterprise Media Streaming Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -44,19 +47,19 @@
       <form id="login-form" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label>Username or Email</label>
-          <input type="text" id="login-username" required placeholder="Enter username or email">
+          <input type="text" id="login-username" required placeholder="Enter your username or email">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="login-password" required placeholder="Enter password">
+          <input type="password" id="login-password" required placeholder="Enter your password">
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Sign In with JWT</button>
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
 
         <div class="quick-creds">
-          <p><strong>Demo Test Accounts:</strong> Click to auto-fill:</p>
+          <p>Demo accounts for testing:</p>
           <div class="quick-tags">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="quickFill('user')">👤 Regular User (user / user123)</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="quickFill('admin')">⚡ Admin (admin / admin123)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="quickFill('user')">User (user@example.com / user123)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="quickFill('admin')">Admin (admin@example.com / admin123)</button>
           </div>
         </div>
       </form>
@@ -64,18 +67,18 @@
       <!-- Register Form -->
       <form id="register-form" style="display: none;" onsubmit="handleRegister(event)">
         <div class="form-group">
-          <label>Choose Username</label>
-          <input type="text" id="reg-username" required placeholder="e.g. alex2024">
+          <label>Username</label>
+          <input type="text" id="reg-username" required placeholder="Choose a username">
         </div>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" id="reg-email" required placeholder="e.g. alex@example.com">
+          <input type="email" id="reg-email" required placeholder="you@example.com">
         </div>
         <div class="form-group">
-          <label>Password (BCrypt Hashed)</label>
-          <input type="password" id="reg-password" required placeholder="At least 6 characters">
+          <label>Password</label>
+          <input type="password" id="reg-password" required placeholder="Minimum 6 characters">
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Create New Account</button>
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
       </form>
     </div>
 
@@ -87,8 +90,8 @@
         <!-- User Status Strip -->
         <div class="user-bar">
           <div>
-            <h3 style="margin-bottom: 0.3rem;">Streaming Subscriptions & Permissions</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Content is unlocked dynamically via your active permissions or role access.</p>
+            <h3 style="margin-bottom: 0.3rem;">Streaming Subscriptions</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Active content packages and streaming entitlements.</p>
           </div>
           <div id="active-perms-strip" class="permissions-strip"></div>
         </div>
@@ -110,10 +113,10 @@
       <div id="requests-view" class="app-view" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <div>
-            <h2>My Temporary Access Requests</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">View status of requests submitted to the Admin for temporary (e.g. 2 hrs, 6 hrs) access.</p>
+            <h2>Access Requests</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">View the status of your temporary streaming access requests.</p>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="openRequestModal()">+ Request New Access</button>
+          <button class="btn btn-primary btn-sm" onclick="openRequestModal()">+ New Request</button>
         </div>
 
         <div class="table-wrapper">
@@ -158,15 +161,15 @@
         </div>
 
         <!-- Pending Requests Section -->
-        <h3 style="margin: 2rem 0 1rem;">User Access Requests (Approve for X Hours Access)</h3>
+        <h3 style="margin: 2rem 0 1rem;">Pending Access Requests</h3>
         <div class="table-wrapper" style="margin-bottom: 3rem;">
           <table>
             <thead>
               <tr>
                 <th>ID</th>
                 <th>User</th>
-                <th>Permission</th>
-                <th>Requested Duration</th>
+                <th>Requested Tier</th>
+                <th>Duration</th>
                 <th>Reason</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -177,15 +180,15 @@
         </div>
 
         <!-- User Management Section -->
-        <h3 style="margin-bottom: 1rem;">Users & Permissions Management</h3>
+        <h3 style="margin-bottom: 1rem;">Users & Role Management (RBAC)</h3>
         <div class="table-wrapper" style="margin-bottom: 3rem;">
           <table>
             <thead>
               <tr>
                 <th>User ID</th>
-                <th>Username / Email</th>
-                <th>Roles</th>
-                <th>Active Permissions</th>
+                <th>Account</th>
+                <th>Assigned Roles</th>
+                <th>Active Subscriptions</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -268,12 +271,12 @@
   <div id="purchase-modal" class="modal-overlay">
     <div class="modal-dialog">
       <button class="modal-close" onclick="closeModal('purchase-modal')">&times;</button>
-      <h3 style="margin-bottom: 0.5rem;">💳 Purchase Streaming Access</h3>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Simulated instant payment gateway. Grants 30 days active permission.</p>
+      <h3 style="margin-bottom: 0.5rem;">Subscribe to Streaming Tier</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Select your preferred streaming package and payment method.</p>
 
       <form onsubmit="handlePurchaseSubmit(event)">
         <div class="form-group">
-          <label>Select Permission Package</label>
+          <label>Streaming Package</label>
           <select id="buy-permission-select" required></select>
         </div>
 
@@ -283,11 +286,11 @@
             <option value="CARD">Credit / Debit Card</option>
             <option value="UPI">UPI Instant Pay</option>
             <option value="PAYPAL">PayPal</option>
-            <option value="WALLET">Simulated Demo Wallet</option>
+            <option value="WALLET">Digital Wallet</option>
           </select>
         </div>
 
-        <button type="submit" class="btn btn-success btn-block">Confirm & Pay</button>
+        <button type="submit" class="btn btn-success btn-block">Confirm Subscription</button>
       </form>
     </div>
   </div>
@@ -296,17 +299,17 @@
   <div id="request-modal" class="modal-overlay">
     <div class="modal-dialog">
       <button class="modal-close" onclick="closeModal('request-modal')">&times;</button>
-      <h3 style="margin-bottom: 0.5rem;">⏱ Request Temporary Access</h3>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Need to watch a show for a few hours? Submit a request to the Admin for temporary access.</p>
+      <h3 style="margin-bottom: 0.5rem;">Request Temporary Access Pass</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Submit a time-limited streaming pass request for administrator review.</p>
 
       <form onsubmit="handleRequestSubmit(event)">
         <div class="form-group">
-          <label>Select Permission</label>
+          <label>Content Category / Pass</label>
           <select id="req-permission-select" required></select>
         </div>
 
         <div class="form-group">
-          <label>Requested Duration (Hours)</label>
+          <label>Requested Duration</label>
           <select id="req-hours-select">
             <option value="2">2 Hours</option>
             <option value="6">6 Hours</option>
@@ -318,10 +321,10 @@
 
         <div class="form-group">
           <label>Reason for Request</label>
-          <textarea id="req-reason" rows="3" placeholder="e.g. Want to finish watching a movie series tonight"></textarea>
+          <textarea id="req-reason" rows="3" placeholder="Brief note explaining why access is requested"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Submit Request to Admin</button>
+        <button type="submit" class="btn btn-primary btn-block">Submit Access Request</button>
       </form>
     </div>
   </div>
@@ -330,7 +333,7 @@
   <div id="admin-grant-modal" class="modal-overlay">
     <div class="modal-dialog">
       <button class="modal-close" onclick="closeModal('admin-grant-modal')">&times;</button>
-      <h3 style="margin-bottom: 0.5rem;">⚡ Grant Permission to User</h3>
+      <h3 style="margin-bottom: 0.5rem;">Grant Streaming Permission</h3>
       <p id="grant-modal-user" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;"></p>
 
       <form onsubmit="handleAdminGrantSubmit(event)">
@@ -340,11 +343,60 @@
         </div>
 
         <div class="form-group">
-          <label>Duration in Hours (0 = Permanent Grant)</label>
+          <label>Duration (Hours, 0 for ongoing access)</label>
           <input type="number" id="admin-grant-hours" value="0" min="0" max="720">
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Grant Permission</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Role Assignment Modal (RBAC) -->
+  <div id="admin-role-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <button class="modal-close" onclick="closeModal('admin-role-modal')">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+        <span style="font-size: 1.25rem;">🛡️</span>
+        <h3 style="margin: 0; font-size: 1.25rem;">Manage User Roles</h3>
+      </div>
+      <p id="role-modal-user" style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;"></p>
+
+      <form onsubmit="handleAdminRoleSubmit(event)">
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.1rem; margin-bottom: 1.25rem;">
+          <label style="font-weight: 600; color: var(--text-main); margin-bottom: 0.75rem; display: block;">Assigned Roles:</label>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; margin-bottom: 0; background: var(--bg-primary); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;">
+              <input type="checkbox" id="role-cb-user" value="ROLE_USER" style="width: 18px; height: 18px; margin-top: 2px;">
+              <div>
+                <div style="font-weight: 600; font-size: 0.925rem; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
+                  <span>ROLE_USER</span>
+                  <span class="role-pill role-user">Standard</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Standard consumer access to media content based on active subscriptions or granted passes.</div>
+              </div>
+            </label>
+
+            <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; margin-bottom: 0; background: var(--bg-primary); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;">
+              <input type="checkbox" id="role-cb-admin" value="ROLE_ADMIN" style="width: 18px; height: 18px; margin-top: 2px;">
+              <div>
+                <div style="font-weight: 600; font-size: 0.925rem; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
+                  <span>ROLE_ADMIN</span>
+                  <span class="role-pill role-admin">Administrator</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Full administrative authority: user management, role assignments, access request approvals, and media catalog management.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="setRolePresets('USER_ONLY')">Standard User Only</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="setRolePresets('PROMOTE_ADMIN')">Promote to Admin</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
       </form>
     </div>
   </div>
